@@ -1,3 +1,5 @@
+this is fork of https://github.com/dellalibera/td-gammon for learning and experimenting purposes. Please check that repo for original implementation
+
 
 <h1 align="center">TD-Gammon</h1> <br>
 <p align="center">
