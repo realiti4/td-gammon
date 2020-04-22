@@ -57,7 +57,5 @@ venv.bak/
 .LSOverride
 
 # Added
-*.tar
-saved_models/
 runs/
 _*/
