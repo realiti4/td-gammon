@@ -228,13 +228,13 @@ class TDGammon(BaseModel):
         # )
 
         self.layers = nn.Sequential(
-            nn.Linear(198, 128),
+            nn.Linear(198, 80),
             nn.Sigmoid(),
             # nn.ReLU(),
             # nn.Linear(40128),
             # nn.ReLU(),
 
-            nn.Linear(128, 1),
+            nn.Linear(80, 1),
             # nn.Softmax(dim=1)
             nn.Sigmoid()
         )

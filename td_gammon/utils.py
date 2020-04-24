@@ -116,8 +116,8 @@ def args_evaluate(args):
         net0.load(checkpoint_path=model_agent0, optimizer=None, eligibility_traces=False)
         net1.load(checkpoint_path=model_agent1, optimizer=None, eligibility_traces=False)
 
-        agents = {WHITE: TDAgent(WHITE, net=net1), BLACK: TDAgent(BLACK, net=net0)}
-        # agents = {WHITE: TDAgent(WHITE, net=net1), BLACK: Agent_2ply(BLACK, net=net0)}
+        # agents = {WHITE: TDAgent(WHITE, net=net1), BLACK: TDAgent(BLACK, net=net0)}
+        agents = {WHITE: TDAgent(WHITE, net=net1), BLACK: Agent_2ply(BLACK, net=net0)}
 
         evaluate_agents(agents, env, n_episodes)
 

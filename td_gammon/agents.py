@@ -195,7 +195,7 @@ class Agent_2ply:
                     # env.game.restore_state(saved_state)
                     self.color = env.get_opponent_agent()
                     assert assert_color == self.color
-                    values[i] = torch.cat(values_temp).max().unsqueeze(0) if self.color == 0 else torch.cat(values_temp).min().unsqueeze(0)
+                    values[i] = torch.cat(values_temp).min().unsqueeze(0) if self.color == 0 else torch.cat(values_temp).max().unsqueeze(0)
                 else:
                     self.color = env.get_opponent_agent()
                     assert assert_color == self.color
@@ -206,7 +206,6 @@ class Agent_2ply:
 
             assert assert_color == self.color
             best_action_index = torch.cat(values).max(0)[1] if self.color == 0 else torch.cat(values).min(0)[1]
-            # best_action_index = int(np.argmax(values)) if self.color == 'WHITE' else int(np.argmax(values))
             best_action = list(actions)[best_action_index]
             env.counter = tmp_counter
 
