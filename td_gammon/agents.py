@@ -145,6 +145,72 @@ class TDAgentGNU(TDAgent):
                 previous_agent = gnubg.agent
             return gnubg
 
+# Custom 2ply agent
+import torch
+
+class Agent_2ply:
+    def __init__(self, color, net):
+        self.color = color
+        self.net = net
+        self.name = f'AgentExample({self.color})'
+        self.two_play = True
+
+    def roll_dice(self):        
+        return (-random.randint(1, 6), -random.randint(1, 6)) if self.color == WHITE else (random.randint(1, 6), random.randint(1, 6))
+
+    def choose_best_action(self, actions, env):
+        best_action = None
+
+        if actions:           
+            values = [0.0 for i in range(len(actions))]
+            assert_color = self.color
+
+            tmp_counter = env.counter
+            env.counter = 0
+            saved_state = env.game.save_state()        
+
+            for i, action in enumerate(actions):            
+
+                observation, reward, done, info = env.step(action)                
+                
+                # 2-ply
+                self.color = env.get_opponent_agent()   
+                roll = self.roll_dice()
+                actions_2ply = env.get_valid_actions(roll)
+
+                if actions_2ply and self.two_play:                   
+                    values_temp = [0.0 for i in range(len(actions_2ply))]
+
+                    tmp_counter_2ply = env.counter
+                    saved_state_2ply = env.game.save_state()
+
+                    for i_e, action_2ply in enumerate(actions_2ply):
+                        observation_2ply, reward, done, info = env.step(action_2ply)
+
+                        with torch.no_grad():
+                            values_temp[i_e] = self.net(observation_2ply)  
+
+                        env.game.restore_state(saved_state_2ply)
+
+                    # env.game.restore_state(saved_state)
+                    self.color = env.get_opponent_agent()
+                    assert assert_color == self.color
+                    values[i] = torch.cat(values_temp).max().unsqueeze(0) if self.color == 0 else torch.cat(values_temp).min().unsqueeze(0)
+                else:
+                    self.color = env.get_opponent_agent()
+                    assert assert_color == self.color
+                    with torch.no_grad():
+                        values[i] = self.net(observation)      # detach() ???
+
+                env.game.restore_state(saved_state)
+
+            assert assert_color == self.color
+            best_action_index = torch.cat(values).max(0)[1] if self.color == 0 else torch.cat(values).min(0)[1]
+            # best_action_index = int(np.argmax(values)) if self.color == 'WHITE' else int(np.argmax(values))
+            best_action = list(actions)[best_action_index]
+            env.counter = tmp_counter
+
+            return best_action
 
 def evaluate_agents(agents, env, n_episodes):
     wins = {WHITE: 0, BLACK: 0}
@@ -159,8 +225,8 @@ def evaluate_agents(agents, env, n_episodes):
         for i in count():
 
             if first_roll:
-                print('heyoo')
-                time.sleep(5)
+                # print('heyoo')
+                # time.sleep(5)
                 roll = first_roll
                 first_roll = None
             else:

@@ -228,13 +228,13 @@ class TDGammon(BaseModel):
         # )
 
         self.layers = nn.Sequential(
-            nn.Linear(198, 80),
+            nn.Linear(198, 128),
             nn.Sigmoid(),
             # nn.ReLU(),
             # nn.Linear(40128),
             # nn.ReLU(),
 
-            nn.Linear(80, 1),
+            nn.Linear(128, 1),
             # nn.Softmax(dim=1)
             nn.Sigmoid()
         )
@@ -253,6 +253,84 @@ class TDGammon(BaseModel):
         # # x = self.hidden2(x)
         # # x = self.hidden3(x)
         # x = self.output(x)
+        return x
+
+    def update_weights(self, p, p_next):
+        # reset the gradients
+        self.zero_grad()
+
+        # compute the derivative of p w.r.t. the parameters
+        p.backward()
+
+        with torch.no_grad():
+
+            td_error = p_next - p
+
+            # get the parameters of the model
+            parameters = list(self.parameters())
+
+            for i, weights in enumerate(parameters):
+
+                # z <- gamma * lambda * z + (grad w w.r.t P_t)
+                self.eligibility_traces[i] = self.lamda * self.eligibility_traces[i] + weights.grad
+
+                # w <- w + alpha * td_error * z
+                new_weights = weights + self.lr * td_error * self.eligibility_traces[i]
+                weights.copy_(new_weights)
+
+        return td_error
+
+
+class TDGammon_stock(BaseModel):
+    def __init__(self, hidden_units, lr, lamda, init_weights, seed=123, input_units=198, output_units=1):
+        super(TDGammon_stock, self).__init__(lr, lamda, seed=seed)
+
+        self.hidden = nn.Sequential(
+            nn.Linear(input_units, hidden_units),
+            nn.Sigmoid()
+        )
+
+        # self.hidden2 = nn.Sequential(
+        #     nn.Linear(hidden_units, hidden_units),
+        #     nn.Sigmoid()
+        # )
+
+        # self.hidden3 = nn.Sequential(
+        #     nn.Linear(hidden_units, hidden_units),
+        #     nn.Sigmoid()
+        # )
+
+        self.output = nn.Sequential(
+            nn.Linear(hidden_units, output_units),
+            nn.Sigmoid()
+        )
+
+        # self.layers = nn.Sequential(
+        #     nn.Linear(198, 80),
+        #     nn.Sigmoid(),
+        #     # nn.ReLU(),
+        #     # nn.Linear(40128),
+        #     # nn.ReLU(),
+
+        #     nn.Linear(80, 1),
+        #     # nn.Softmax(dim=1)
+        #     nn.Sigmoid()
+        # )
+
+        if init_weights:
+            self.init_weights()
+
+    def init_weights(self):
+        for p in self.parameters():
+            nn.init.zeros_(p)
+
+    def forward(self, x):
+        x = torch.from_numpy(np.array(x))
+        # x = self.layers(x)
+        x = self.hidden(x)
+        # x = self.hidden2(x)
+        # x = self.hidden3(x)
+        x = self.output(x)
         return x
 
     def update_weights(self, p, p_next):

@@ -1,10 +1,10 @@
 import os
 import gym
 import sys
-from agents import TDAgent, HumanAgent, TDAgentGNU, RandomAgent, evaluate_agents
+from agents import TDAgent, HumanAgent, TDAgentGNU, RandomAgent, evaluate_agents, Agent_2ply
 from gnubg.gnubg_backgammon import GnubgInterface, GnubgEnv, evaluate_vs_gnubg
 from gym_backgammon.envs.backgammon import WHITE, BLACK
-from model import TDGammon, TDGammonCNN
+from model import TDGammon, TDGammon_stock, TDGammonCNN
 from web_gui.gui import GUI
 from torch.utils.tensorboard import SummaryWriter
 
@@ -106,7 +106,7 @@ def args_evaluate(args):
 
         if model_type == 'nn':
             net0 = TDGammon(hidden_units=hidden_units_agent0, lr=0.1, lamda=None, init_weights=False)
-            net1 = TDGammon(hidden_units=hidden_units_agent1, lr=0.1, lamda=None, init_weights=False)
+            net1 = TDGammon_stock(hidden_units=hidden_units_agent1, lr=0.1, lamda=None, init_weights=False)
             env = gym.make('gym_backgammon:backgammon-v0')
         else:
             net0 = TDGammonCNN(lr=0.0001)
@@ -117,6 +117,7 @@ def args_evaluate(args):
         net1.load(checkpoint_path=model_agent1, optimizer=None, eligibility_traces=False)
 
         agents = {WHITE: TDAgent(WHITE, net=net1), BLACK: TDAgent(BLACK, net=net0)}
+        # agents = {WHITE: TDAgent(WHITE, net=net1), BLACK: Agent_2ply(BLACK, net=net0)}
 
         evaluate_agents(agents, env, n_episodes)
 
