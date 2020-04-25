@@ -78,7 +78,7 @@ def args_gui(args):
         # assert os.path.exists(args.model), print("The path {} doesn't exists".format(args.model))
 
         if args.type == 'nn':
-            net = TDGammon(hidden_units=args.hidden_units, lr=0.004, lamda=None, init_weights=False)
+            net = TDGammon(hidden_units=args.hidden_units, lr=0.1, lamda=None, init_weights=False)
             env = gym.make('gym_backgammon:backgammon-v0')
         else:
             net = TDGammonCNN(lr=0.0001)
@@ -86,7 +86,8 @@ def args_gui(args):
 
         net.load(checkpoint_path=args.model, optimizer=None, eligibility_traces=False)
 
-        agents = {BLACK: TDAgent(BLACK, net=net), WHITE: HumanAgent(WHITE)}
+        # agents = {BLACK: TDAgent(BLACK, net=net), WHITE: HumanAgent(WHITE)}
+        agents = {BLACK: Agent_2ply(BLACK, net=net), WHITE: HumanAgent(WHITE)}
         gui = GUI(env=env, host=args.host, port=args.port, agents=agents)
         gui.run()
 
