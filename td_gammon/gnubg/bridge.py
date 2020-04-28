@@ -2,8 +2,8 @@
 # IT USES PYTHON 2.7
 
 import gnubg
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-# from http.server import BaseHTTPRequestHandler, HTTPServer
+# from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 
 try:

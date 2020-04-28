@@ -162,7 +162,7 @@ class Agent_2ply:
         best_action = None
 
         if actions:           
-            values = [0.0 for i in range(len(actions))]
+            values = torch.zeros(len(actions), device=device)
             assert_color = self.color
 
             tmp_counter = env.counter
@@ -178,8 +178,9 @@ class Agent_2ply:
                 roll = self.roll_dice()
                 actions_2ply = env.get_valid_actions(roll)
 
-                if actions_2ply and self.two_play:                   
-                    values_temp = [0.0 for i in range(len(actions_2ply))]
+                if actions_2ply:                   
+                    # store_obs = torch.zeros([len(actions_2ply), 198], device=device)
+                    obs_array = np.zeros([len(actions_2ply), 198], dtype='float32')
 
                     tmp_counter_2ply = env.counter
                     saved_state_2ply = env.game.save_state()
@@ -187,25 +188,29 @@ class Agent_2ply:
                     for i_e, action_2ply in enumerate(actions_2ply):
                         observation_2ply, reward, done, info = env.step(action_2ply)
 
-                        with torch.no_grad():
-                            values_temp[i_e] = self.net(observation_2ply)  
+                        # store_obs[i_e] = torch.FloatTensor(observation_2ply)
+                        obs_array[i_e] = observation_2ply
 
                         env.game.restore_state(saved_state_2ply)
 
-                    # env.game.restore_state(saved_state)
+                    with torch.no_grad():
+                        store_obs = torch.from_numpy(obs_array).double()
+                        values_temp = self.net(store_obs).squeeze(1)
+
                     self.color = env.get_opponent_agent()
                     assert assert_color == self.color
-                    values[i] = torch.cat(values_temp).min().unsqueeze(0) if self.color == 0 else torch.cat(values_temp).max().unsqueeze(0)
+                    values[i] = values_temp.min().unsqueeze(0) if self.color == 0 else values_temp.max().unsqueeze(0)
                 else:
                     self.color = env.get_opponent_agent()
                     assert assert_color == self.color
+                    observation = torch.tensor(observation)
                     with torch.no_grad():
                         values[i] = self.net(observation)      # detach() ???
 
                 env.game.restore_state(saved_state)
 
             assert assert_color == self.color
-            best_action_index = torch.cat(values).max(0)[1] if self.color == 0 else torch.cat(values).min(0)[1]
+            best_action_index = values.max(0)[1] if self.color == 0 else values.min(0)[1]
             best_action = list(actions)[best_action_index]
             env.counter = tmp_counter
 

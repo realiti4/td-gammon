@@ -86,8 +86,8 @@ def args_gui(args):
 
         net.load(checkpoint_path=args.model, optimizer=None, eligibility_traces=False)
 
-        # agents = {BLACK: TDAgent(BLACK, net=net), WHITE: HumanAgent(WHITE)}
-        agents = {BLACK: Agent_2ply(BLACK, net=net), WHITE: HumanAgent(WHITE)}
+        agents = {BLACK: TDAgent(BLACK, net=net), WHITE: HumanAgent(WHITE)}
+        # agents = {BLACK: Agent_2ply(BLACK, net=net), WHITE: HumanAgent(WHITE)}
         gui = GUI(env=env, host=args.host, port=args.port, agents=agents)
         gui.run()
 
@@ -108,6 +108,7 @@ def args_evaluate(args):
         if model_type == 'nn':
             net0 = TDGammon(hidden_units=hidden_units_agent0, lr=0.1, lamda=None, init_weights=False)
             net1 = TDGammon_stock(hidden_units=hidden_units_agent1, lr=0.1, lamda=None, init_weights=False)
+            # net1 = TDGammon(hidden_units=hidden_units_agent0, lr=0.1, lamda=None, init_weights=False)
             env = gym.make('gym_backgammon:backgammon-v0')
         else:
             net0 = TDGammonCNN(lr=0.0001)
@@ -117,8 +118,8 @@ def args_evaluate(args):
         net0.load(checkpoint_path=model_agent0, optimizer=None, eligibility_traces=False)
         net1.load(checkpoint_path=model_agent1, optimizer=None, eligibility_traces=False)
 
-        # agents = {WHITE: TDAgent(WHITE, net=net1), BLACK: TDAgent(BLACK, net=net0)}
-        agents = {WHITE: TDAgent(WHITE, net=net1), BLACK: Agent_2ply(BLACK, net=net0)}
+        agents = {WHITE: TDAgent(WHITE, net=net1), BLACK: TDAgent(BLACK, net=net0)}
+        # agents = {WHITE: TDAgent(WHITE, net=net1), BLACK: Agent_2ply(BLACK, net=net0)}
 
         evaluate_agents(agents, env, n_episodes)
 

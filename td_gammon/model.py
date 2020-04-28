@@ -207,35 +207,17 @@ class TDGammon(BaseModel):
     def __init__(self, hidden_units, lr, lamda, init_weights, seed=123, input_units=198, output_units=1):
         super(TDGammon, self).__init__(lr, lamda, seed=seed)
 
-        # self.hidden = nn.Sequential(
-        #     nn.Linear(input_units, hidden_units),
-        #     nn.Sigmoid()
-        # )
-
-        # # self.hidden2 = nn.Sequential(
-        # #     nn.Linear(hidden_units, hidden_units),
-        # #     nn.Sigmoid()
-        # # )
-
-        # # self.hidden3 = nn.Sequential(
-        # #     nn.Linear(hidden_units, hidden_units),
-        # #     nn.Sigmoid()
-        # # )
-
-        # self.output = nn.Sequential(
-        #     nn.Linear(hidden_units, output_units),
-        #     nn.Sigmoid()
-        # )
 
         self.layers = nn.Sequential(
-            nn.Linear(198, 80),
+            nn.Linear(198, hidden_units),
+            # torch.nn.utils.weight_norm(nn.Linear(198, hidden_units), name='weight'),
             nn.Sigmoid(),
-            # nn.ReLU(),
-            # nn.Linear(40128),
-            # nn.ReLU(),
 
-            nn.Linear(80, 1),
-            # nn.Softmax(dim=1)
+            nn.Linear(hidden_units, hidden_units),
+            nn.Sigmoid(),
+
+            nn.Linear(hidden_units, 1),
+            # torch.nn.utils.weight_norm(nn.Linear(hidden_units, hidden_units), name='weight'),
             nn.Sigmoid()
         )
 
@@ -249,10 +231,6 @@ class TDGammon(BaseModel):
     def forward(self, x):
         x = torch.from_numpy(np.array(x))
         x = self.layers(x)
-        # x = self.hidden(x)
-        # # x = self.hidden2(x)
-        # # x = self.hidden3(x)
-        # x = self.output(x)
         return x
 
     def update_weights(self, p, p_next):
@@ -306,13 +284,13 @@ class TDGammon_stock(BaseModel):
         )
 
         # self.layers = nn.Sequential(
-        #     nn.Linear(198, 80),
+        #     nn.Linear(198, hidden_units),
         #     nn.Sigmoid(),
         #     # nn.ReLU(),
         #     # nn.Linear(40128),
         #     # nn.ReLU(),
 
-        #     nn.Linear(80, 1),
+        #     nn.Linear(hidden_units, 1),
         #     # nn.Softmax(dim=1)
         #     nn.Sigmoid()
         # )
