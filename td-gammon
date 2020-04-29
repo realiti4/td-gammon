@@ -1,0 +1,16 @@
+
+## gnu evaluate
+
+gnubg -t -p td_gammon/gnubg/bridge.py
+
+python td_gammon/main.py evaluate --episodes 50 --hidden_units_agent0 80 --type nn --model_agent0 saved_models/test.tar vs_gnubg --difficulty world_class --host localhost --port 8001
+
+
+## Agent vs Agent
+
+python td_gammon/main.py evaluate --episodes 50 --hidden_units_agent0 64 --hidden_units_agent1 40 --type nn --model_agent0 saved_models/agent600k_64h.tar --model_agent1 saved_models/agent30k.tar
+
+## Agent vs Human
+
+python td_gammon/main.py gui --host localhost --port 8002 --model saved_models/agent750k_64h.tar --hidden_units 64 --type nn
+
